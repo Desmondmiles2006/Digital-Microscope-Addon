@@ -1,0 +1,11 @@
+torch
+torchvision
+numpy>=1.26.4
+pillow>=10.0.0
+PyQt5>=5.15.10
+opencv-python>=4.9.0.80
+requests>=2.31.0
+reportlab>=4.1.0
+ultralytics>=8.2.0
+mcp>=1.0.0
+scikit-learn

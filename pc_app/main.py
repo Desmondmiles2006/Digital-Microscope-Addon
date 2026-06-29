@@ -6,9 +6,11 @@ Panels:
   Right — Tabbed: Live View controls | Gallery | AI Analysis | Settings
 """
 
-import logging
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from ai_engine.malaria import MalariaDetector
+import logging
 from typing import Optional
 
 import cv2
@@ -24,7 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from streamer_client import MJPEGClient
-from ai_engine import MicroscopeAI
+from microscope_ai import MicroscopeAI
 from image_tools import enhance_contrast
 
 logging.basicConfig(level=logging.INFO)
@@ -66,6 +68,7 @@ class MainWindow(QMainWindow):
         self._current_frame: Optional[np.ndarray] = None
         self._client: Optional[MJPEGClient] = None
         self._ai: Optional[MicroscopeAI] = None
+        self._malaria: Optional[MalariaDetector] = None
         self._frame_signal = FrameSignal()
         self._frame_signal.frame_ready.connect(self._on_frame)
 
@@ -161,6 +164,9 @@ class MainWindow(QMainWindow):
         load_btn.clicked.connect(self._load_ai_image)
         analyze_btn = QPushButton("🔬 Analyze with AI")
         analyze_btn.clicked.connect(self._run_ai_analysis)
+        malaria_btn = QPushButton("🦟 Malaria Detection")
+        malaria_btn.clicked.connect(self._run_malaria_detection)
+        btn_row.addWidget(malaria_btn)
         report_btn = QPushButton("📄 Generate PDF Report")
         report_btn.clicked.connect(self._generate_report)
         btn_row.addWidget(load_btn); btn_row.addWidget(analyze_btn); btn_row.addWidget(report_btn)
@@ -230,6 +236,7 @@ class MainWindow(QMainWindow):
 
         api_key = self._api_key_input.text().strip() or None
         self._ai = MicroscopeAI(api_key=api_key)
+        self._malaria = MalariaDetector()
 
     def _on_frame(self, frame: np.ndarray) -> None:
         self._current_frame = frame
@@ -346,6 +353,28 @@ class MainWindow(QMainWindow):
             self._ai_text.setText(result)
         except Exception as exc:
             self._ai_text.setText(f"Error: {exc}")
+
+    def _run_malaria_detection(self) -> None:
+        if not self._ai_image_path:
+            QMessageBox.warning(self, "No Image", "Please load or capture an image first.")
+            return
+
+            # Initialize detector if not done yet
+        if self._malaria is None:
+            try:
+                self._malaria = MalariaDetector()
+            except Exception as exc:
+                QMessageBox.critical(self, "Model Error", str(exc))
+                return
+
+        self._ai_text.setText("Running malaria detection... please wait.")
+        QApplication.processEvents()
+
+        try:
+            result = self._malaria.analyze_slide(self._ai_image_path)
+            self._ai_text.setText(result)
+        except Exception as exc:
+            self._ai_text.setText("Error: " + str(exc))
 
     def _generate_report(self) -> None:
         if not self._ai_image_path or not self._ai_text.toPlainText():

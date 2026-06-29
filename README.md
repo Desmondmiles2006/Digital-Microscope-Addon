@@ -1,175 +1,102 @@
-# Digital Microscope Add-on Module
+# ESP32-OV7670 AI Digital Microscope Add-on
 
-A wireless, AI-enabled digital imaging add-on that transforms any conventional compound microscope into a smart, connected, and intelligent imaging system. This project aims to bridge the gap between traditional optical microscopy and modern digital + AI-powered analysis, without requiring replacement of existing microscopes.
-
-The add-on captures microscope images using a CMOS camera, displays a live preview on an integrated screen, streams data wirelessly to a PC, and enables advanced visualization, analysis, and Generative AI–based interpretation.
-
----
-
-## 🔬 Problem Statement
-
-Traditional compound microscopes:
-- Are purely optical and lack digital connectivity
-- Do not support image storage or sharing
-- Offer no intelligent assistance for learning or analysis
-
-Existing digital microscopes:
-- Are expensive
-- Replace existing microscopes instead of upgrading them
-- Rarely support AI-based educational or diagnostic assistance
+A wireless, AI-enabled digital microscope add-on built with an ESP32 Dev Module
+and OV7670 camera. Streams live MJPEG video over Wi-Fi to a PyQt5 desktop app
+with Claude Vision AI analysis and a Model Context Protocol (MCP) server.
 
 ---
 
-## 💡 Our Solution
+## Wiring Diagram
+```
+ESP32 Dev Module          OV7670 Camera
+─────────────────         ──────────────
+3.3V  ─────────────────── 3.3V
+GND   ─────────────────── GND
+GPIO 0 (LEDC PWM) ─────── XCLK
+GPIO 4  ────────────────── D0
+GPIO 36 (input only) ───── D1
+GPIO 2  ────────────────── D2
+GPIO 15 ────────────────── D3
+GPIO 12 ────────────────── D4
+GPIO 13 ────────────────── D5
+GPIO 14 ────────────────── D6
+GPIO 27 ────────────────── D7
+GPIO 25 ────────────────── PCLK
+GPIO 26 ────────────────── HREF
+GPIO 34 (input only) ───── VSYNC
+GPIO 21 (SDA) ──────────── SIOD
+GPIO 22 (SCL) ──────────── SIOC
+GPIO 32 ────────────────── PWDN  (pull LOW to run)
+GPIO 33 ────────────────── RESET (pull HIGH to run)
 
-A compact Digital Microscope Add-on Module that:
-- Mounts onto existing compound microscopes
-- Digitizes the optical image in real time
-- Displays live preview on an onboard screen
-- Streams wirelessly to a PC
-- Integrates with Generative AI for smart analysis and reporting
+OLED SSD1306 (I2C)
+GPIO 21 (SDA) ──── SDA
+GPIO 22 (SCL) ──── SCL
+3.3V  ───────────── VCC
+GND   ───────────── GND
+```
 
-This approach provides an **affordable, scalable, and intelligent upgrade path** for biomedical laboratories and educational institutions.
-
----
-
-## 🚀 Key Features
-
-- CMOS camera–based image acquisition  
-- Wireless streaming to PC (Wi-Fi / Bluetooth)  
-- On-device OLED/TFT display for live preview  
-- Desktop application for:
-  - Live viewing
-  - Image and video capture
-  - Annotation and measurements
-  - Dataset management  
-- Generative AI integration for:
-  - Slide explanation and interpretation
-  - Cell and object detection
-  - Anomaly identification (educational support)
-  - Automatic lab report generation
-  - Dataset creation for AI research
-
----
-
-## 🧠 Gen-AI Capabilities
-
-| Feature | Description |
-|------|------------|
-| Slide Explanation | Explains observed structures in natural language |
-| Object Detection | Identifies cells, bacteria, parasites, tissue features |
-| Anomaly Highlighting | Flags irregular morphology for learning |
-| Report Generation | Generates structured lab reports |
-| Conversational AI | Allows users to ask questions about slides |
-| Dataset Builder | Creates labeled datasets for training AI models |
+> ⚠️ OV7670 is 3.3V only. Never connect to 5V.
 
 ---
 
-## 🏗 System Architecture Overview
+## Firmware Setup (PlatformIO)
 
-The system consists of:
-
-1. **Optical Interface**
-   - Eyepiece/trinocular coupling
-   - Optical adapter lens
-
-2. **Imaging Module**
-   - CMOS camera sensor
-   - Embedded controller (MCU/SoC)
-
-3. **Wireless Communication**
-   - Wi-Fi / Bluetooth
-
-4. **Local Display**
-   - OLED/TFT preview screen
-
-5. **PC Application**
-   - Visualization, capture, and annotation
-   - AI interaction interface
-
-6. **Gen-AI Engine**
-   - Vision AI models
-   - Language models for explanation & reports
+1. Install VS Code + PlatformIO extension.
+2. Clone this repo and open the root folder.
+3. Edit `firmware/src/streamer.h` — set your `WIFI_SSID` and `WIFI_PASS`.
+4. Build and flash:
+```bash
+   pio run --target upload
+   pio device monitor --baud 115200
+```
+5. Note the IP address printed in Serial Monitor.
 
 ---
 
-## 🛠 Technology Stack
+## PC App Setup
+```bash
+pip install -r requirements.txt
+python pc_app/main.py
+```
 
-- Embedded: ESP32 / STM32 / Raspberry Pi Zero (prototype)
-- Camera: CMOS sensor (OV2640 / OV5640 / CSI camera)
-- Communication: Wi-Fi, Bluetooth
-- Display: OLED / TFT
-- PC App:
-  - Python + OpenCV
-  - PyQt / Electron / C# (future)
-- AI:
-  - OpenCV
-  - PyTorch / TensorFlow
-  - Generative AI APIs
-  - Custom trained vision models
+In the Settings tab, enter the ESP32 IP address and click Connect.
 
 ---
 
-## 🧪 Applications
+## MCP Server Setup
+```bash
+pip install anthropic requests
+```
 
-- Biomedical education
-- Pathology and hematology labs (educational support)
-- Research documentation
-- Smart classrooms
-- AI dataset generation
-- Remote demonstrations
+Edit `mcp_server/config.json` — set `esp32_ip` and `anthropic_api_key`.
 
----
+Add to Claude Desktop `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "microscope": {
+      "command": "python",
+      "args": ["/absolute/path/to/mcp_server/server.py"]
+    }
+  }
+}
+```
 
-## 🗺 Development Roadmap
-
-| Phase | Goal |
-|------|------|
-| Phase 1 | Basic camera + on-device display |
-| Phase 2 | Wireless streaming to PC |
-| Phase 3 | PC software + capture tools |
-| Phase 4 | AI analysis and explanation |
-| Phase 5 | Pilot deployment in colleges |
-| Phase 6 | Commercial-ready product |
-
----
-
-## 💰 Target Cost
-
-Estimated BOM: ₹3,000 – ₹5,000  
-Expected market price: ₹8,000 – ₹15,000  
-
-Far more affordable than professional digital microscope cameras.
+Restart Claude Desktop. The microscope tools will appear in the tools panel.
 
 ---
 
-## 📌 Status
+## Library Install Reference
 
-Currently in:
-> System architecture and design phase.
+| Library | Install |
+|---------|---------|
+| ESPAsyncWebServer | PlatformIO lib_deps (auto) |
+| Adafruit SSD1306 | PlatformIO lib_deps (auto) |
+| anthropic | `pip install anthropic` |
+| ultralytics | `pip install ultralytics` |
+| reportlab | `pip install reportlab` |
+| PyQt5 | `pip install PyQt5` |
 
-Hardware prototyping and firmware development are next.
-
----
-
-## 📄 License
-
-This project is released under the MIT License.  
-You are free to use, modify, and distribute with attribution.
-
----
-
-## 🌟 Vision Statement
-
-> “To make intelligent digital microscopy accessible, affordable, and AI-powered for every laboratory and classroom.”
-
-This project combines:
-- Embedded systems  
-- Biomedical instrumentation  
-- Wireless communication  
-- Computer vision  
-- Generative AI  
-
-into one unified, future-ready platform.
-
-
+& "D:\micro_scope\venv_gpu\Scripts\Activate.ps1"
+192.168.4.1

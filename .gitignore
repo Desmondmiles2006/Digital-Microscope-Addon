@@ -1,0 +1,79 @@
+# ─── PlatformIO ───────────────────────────────────────────────
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ─── VS Code ──────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+
+# ─── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ─── AI Models ────────────────────────────────────────────────
+ai_engine/models/*.pt
+ai_engine/models/*.tflite
+ai_engine/models/*.onnx
+ai_engine/models/*.h5
+!ai_engine/models/.gitkeep
+
+# ─── Dataset / Captures ───────────────────────────────────────
+dataset/
+pc_app/MicroscopeCaptures/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+!docs/**/*.png
+!docs/**/*.jpg
+
+# ─── Generated Reports ────────────────────────────────────────
+*.pdf
+
+# ─── Secrets / Config with keys ───────────────────────────────
+mcp_server/config.json
+.env
+secrets.h
+firmware/src/secrets.h
+
+# ─── Compiled / Build Artifacts ───────────────────────────────
+*.o
+*.a
+*.elf
+*.bin
+*.hex
+*.map
+*.d
+
+# ─── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ─── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Jupyter (if used for AI experimentation) ─────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── YOLOv8 Training Runs ─────────────────────────────────────
+ai_engine/models/microscope_run/
+runs/
